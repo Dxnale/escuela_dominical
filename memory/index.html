@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#fff8e8" />
+    <title>Taller de versículos · Memoriza jugando</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Baloo+2:wght@400;600;700&family=Fredoka:wght@400;500;600&family=Nunito:wght@400;600;700;800&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a href="#" class="brand"><span class="brand-spark">✦</span><span>Taller de versículos</span></a>
+      <div class="top-actions">
+        <span id="save-status">Guardado</span>
+        <button id="print-button" class="button button-ink" type="button">Imprimir en A4</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="intro">
+        <div>
+          <p class="eyebrow">Memoriza jugando</p>
+          <h1>Palabras con <span>chispa.</span></h1>
+          <p>Colorea las pistas importantes o escóndelas detrás de un emoji. Tu memoria hará el resto.</p>
+        </div>
+        <div class="doodle" aria-hidden="true"><span>★</span><span>●</span><span>✿</span></div>
+      </section>
+
+      <form id="verse-form" class="loader-card">
+        <div class="field verse-field">
+          <label for="reference-input">Versículo</label>
+          <input id="reference-input" value="Juan 3:16" autocomplete="off" spellcheck="false" />
+        </div>
+        <div class="field">
+          <label for="version-select">Versión</label>
+          <select id="version-select">
+            <option value="RVR1960">Reina-Valera 1960</option>
+            <option value="NTV">Nueva Traducción Viviente</option>
+          </select>
+        </div>
+        <button class="button button-sun" type="submit">Cargar verso <span>→</span></button>
+      </form>
+
+      <section class="studio">
+        <aside class="toolbox">
+          <div class="toolbox-heading">
+            <p class="eyebrow">Caja de herramientas</p>
+            <h2>Decora tus pistas</h2>
+          </div>
+
+          <div class="tool-group">
+            <div class="tool-label"><span>1</span><div><strong>Selecciona palabras</strong><small>Haz clic o dibuja un recuadro.</small></div></div>
+            <div class="selection-actions">
+              <span id="selection-count">0 seleccionadas</span>
+              <button id="select-all" type="button">Todas</button>
+            </div>
+            <div class="shortcut-hints"><span><kbd>Supr</kbd> Restaurar</span><span><kbd>Enter</kbd> Deseleccionar</span></div>
+          </div>
+
+          <div class="tool-group">
+            <div class="tool-label"><span>2</span><div><strong>Dales color</strong><small>Pulsa un círculo para pintar.</small></div></div>
+            <div class="base-color-row">
+              <span>Color base</span>
+              <div id="base-colors" class="base-colors">
+                <button type="button" data-base-color="#25251f" style="--swatch:#25251f" aria-label="Carbón"></button>
+                <button type="button" data-base-color="#243a5a" style="--swatch:#243a5a" aria-label="Azul tinta"></button>
+                <button type="button" data-base-color="#5b342b" style="--swatch:#5b342b" aria-label="Marrón"></button>
+                <button type="button" data-base-color="#315b45" style="--swatch:#315b45" aria-label="Verde bosque"></button>
+                <label class="base-custom" title="Otro color base"><input id="base-color" type="color" value="#25251f" /><span>+</span></label>
+              </div>
+            </div>
+            <span class="accent-label">Color para la selección</span>
+            <div id="color-palette" class="color-palette" aria-label="Paleta de colores">
+              <button type="button" data-color="#e34f66" style="--swatch:#e34f66" aria-label="Rojo sandía"></button>
+              <button type="button" data-color="#ee8a24" style="--swatch:#ee8a24" aria-label="Naranja"></button>
+              <button type="button" data-color="#d5a900" style="--swatch:#d5a900" aria-label="Amarillo oscuro"></button>
+              <button type="button" data-color="#26946f" style="--swatch:#26946f" aria-label="Verde"></button>
+              <button type="button" data-color="#297cc1" style="--swatch:#297cc1" aria-label="Azul"></button>
+              <button type="button" data-color="#815ab7" style="--swatch:#815ab7" aria-label="Violeta"></button>
+              <label class="custom-color" title="Elegir otro color"><input id="custom-color" type="color" value="#e34f66" /><span>+</span></label>
+            </div>
+          </div>
+
+          <div class="tool-group">
+            <div class="tool-label"><span>3</span><div><strong>O escóndelas</strong><small>El emoji conserva el espacio original.</small></div></div>
+            <div id="emoji-tabs" class="emoji-tabs">
+              <button type="button" class="active" data-emoji-category="fe">Fe</button><button type="button" data-emoji-category="naturaleza">Naturaleza</button><button type="button" data-emoji-category="personas">Personas</button><button type="button" data-emoji-category="objetos">Objetos</button>
+            </div>
+            <div id="emoji-palette" class="emoji-palette" aria-label="Selector de emojis"></div>
+            <div class="custom-emoji-row">
+              <input id="custom-emoji" maxlength="8" placeholder="Tu emoji 😊" aria-label="Emoji personalizado" />
+              <button id="apply-custom-emoji" type="button">Usar</button>
+            </div>
+            <label class="png-upload" for="png-input"><span>▧</span><div><strong>Subir o pegar un PNG</strong><small id="png-status">Adjunta o usa Ctrl+V · transparencia recomendada</small></div><input id="png-input" type="file" accept="image/png" /></label>
+          </div>
+
+          <div class="reset-row">
+            <button id="restore-selected" type="button">Restaurar selección</button>
+            <button id="restore-all" type="button">Limpiar todo</button>
+          </div>
+        </aside>
+
+        <article class="canvas-card">
+          <div class="canvas-top">
+            <div><p id="verse-version" class="eyebrow">Sin verso</p><h2 id="verse-reference">Carga un versículo</h2></div>
+            <button id="paste-button" class="button button-soft" type="button">Escribir manualmente</button>
+          </div>
+          <div id="empty-state" class="empty-state"><span>☁</span><strong>Tu verso aparecerá aquí</strong><small>Después podrás convertirlo en un pequeño juego de memoria.</small></div>
+          <div id="verse-canvas" class="verse-canvas" aria-live="polite"></div>
+          <p id="copyright" class="copyright"></p>
+          <div class="canvas-hint"><span class="mouse-icon">↖</span> Clic para una palabra · Arrastra para seleccionar varias</div>
+        </article>
+      </section>
+    </main>
+
+    <dialog id="manual-dialog">
+      <form method="dialog" class="dialog-card">
+        <button class="dialog-close" value="cancel" aria-label="Cerrar">×</button>
+        <p class="eyebrow">Entrada manual</p>
+        <h2>Escribe el versículo</h2>
+        <label for="manual-reference">Referencia</label>
+        <input id="manual-reference" value="Juan 3:16" />
+        <label for="manual-text">Texto</label>
+        <textarea id="manual-text" rows="5" placeholder="Porque de tal manera amó Dios al mundo…"></textarea>
+        <div class="dialog-actions"><button value="cancel" class="button button-soft">Cancelar</button><button id="use-manual" value="default" class="button button-sun">Usar este verso</button></div>
+      </form>
+    </dialog>
+
+    <dialog id="print-dialog">
+      <form method="dialog" class="dialog-card">
+        <button class="dialog-close" value="cancel" aria-label="Cerrar">×</button>
+        <p class="eyebrow">A4 horizontal</p>
+        <h2>Elige la letra</h2>
+        <p class="dialog-copy">Calcularemos automáticamente el tamaño más grande que cabe en la hoja.</p>
+        <div id="font-options" class="font-options">
+          <label style="--sample-font:'Nunito',sans-serif"><input type="radio" name="print-font" value="Nunito" checked /><span>Aa</span><strong>Nunito</strong></label>
+          <label style="--sample-font:'Quicksand',sans-serif"><input type="radio" name="print-font" value="Quicksand" /><span>Aa</span><strong>Quicksand</strong></label>
+          <label style="--sample-font:'Fredoka',sans-serif"><input type="radio" name="print-font" value="Fredoka" /><span>Aa</span><strong>Fredoka</strong></label>
+          <label style="--sample-font:'Atkinson Hyperlegible',sans-serif"><input type="radio" name="print-font" value="Atkinson Hyperlegible" /><span>Aa</span><strong>Atkinson</strong></label>
+          <label style="--sample-font:'Baloo 2',sans-serif"><input type="radio" name="print-font" value="Baloo 2" /><span>Aa</span><strong>Baloo 2</strong></label>
+        </div>
+        <div class="dialog-actions"><button value="cancel" class="button button-soft">Cancelar</button><button id="confirm-print" value="default" class="button button-sun">Preparar impresión</button></div>
+      </form>
+    </dialog>
+
+    <div id="selection-box" class="selection-box" aria-hidden="true"></div>
+    <section id="print-root" aria-hidden="true"></section>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <script src="app.js"></script>
+  </body>
+</html>

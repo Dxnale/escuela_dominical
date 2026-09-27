@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f7f4ed" />
+    <title>Voces · Lecturas bíblicas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Inter:wght@400;600;700;800&family=Lora:wght@400;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="Voces, inicio">
+        <span class="brand-mark" aria-hidden="true">V</span>
+        <span>Voces</span>
+      </a>
+      <div class="top-actions">
+        <span id="save-status" class="save-status">Guardado</span>
+        <a class="button button-ghost source-link" href="https://api.midvash.com/docs" target="_blank" rel="noreferrer">Fuente bíblica ↗</a>
+        <button id="print-button" class="button button-dark" type="button">Imprimir hojas</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <p class="eyebrow">Preparación de lecturas</p>
+        <h1>Una voz para cada<br /><em>personaje.</em></h1>
+        <p class="hero-copy">Carga un pasaje, asigna cada diálogo y crea guiones claros para todo el grupo.</p>
+      </section>
+
+      <section class="search-card" aria-label="Buscar pasaje">
+        <form id="passage-form">
+          <div class="field passage-field">
+            <label for="passage-input">Pasaje bíblico</label>
+            <input id="passage-input" name="passage" value="Juan 3:1-12" autocomplete="off" spellcheck="false" />
+          </div>
+          <div class="field version-field">
+            <label for="version-select">Versión</label>
+            <select id="version-select" name="version">
+              <option value="RVR1960">Reina-Valera 1960</option>
+              <option value="NTV">Nueva Traducción Viviente</option>
+            </select>
+          </div>
+          <button class="button button-accent load-button" type="submit">
+            <span aria-hidden="true">↗</span> Cargar pasaje
+          </button>
+        </form>
+        <p id="api-hint" class="form-hint">Carga directa y sin registro · También puedes pegar el texto manualmente.</p>
+      </section>
+
+      <section id="workspace" class="workspace">
+        <aside class="character-panel">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Reparto</p>
+              <h2>Personajes</h2>
+            </div>
+            <span id="character-count" class="count">0</span>
+          </div>
+          <p class="panel-help">Selecciona un personaje. Arrastra un recuadro sobre el texto y pulsa su color para cambiarlo.</p>
+          <div id="character-list" class="character-list"></div>
+          <form id="character-form" class="add-character-form">
+            <input id="character-name" aria-label="Nombre del personaje" placeholder="Nuevo personaje" maxlength="32" required />
+            <input id="character-color" aria-label="Color" type="color" value="#ef704f" />
+            <button type="submit" aria-label="Añadir personaje">+</button>
+          </form>
+          <button id="eraser-button" class="eraser-button" type="button"><span aria-hidden="true">⌫</span> Borrar asignación</button>
+        </aside>
+
+        <article class="passage-panel">
+          <div class="passage-toolbar">
+            <div>
+              <p id="passage-version" class="eyebrow">Sin pasaje</p>
+              <h2 id="passage-title">Prepara tu lectura</h2>
+            </div>
+            <div class="toolbar-actions">
+              <button id="paste-button" class="button button-ghost" type="button">Pegar texto</button>
+              <button id="clear-button" class="icon-button" type="button" title="Quitar todas las asignaciones" aria-label="Quitar todas las asignaciones">↺</button>
+            </div>
+          </div>
+          <div id="selection-tip" class="selection-tip" hidden>
+            <span id="active-color" class="active-dot"></span>
+            Asignando a <strong id="active-name"></strong>. Haz clic en una palabra o dibuja un recuadro.
+          </div>
+          <div id="empty-state" class="empty-state">
+            <span class="empty-icon" aria-hidden="true">“</span>
+            <h3>El pasaje aparecerá aquí</h3>
+            <p>Cárgalo desde la API o pega el texto para comenzar.</p>
+          </div>
+          <div id="passage-content" class="passage-content" aria-live="polite"></div>
+          <p id="copyright" class="copyright"></p>
+        </article>
+      </section>
+    </main>
+
+    <dialog id="paste-dialog">
+      <form method="dialog" class="dialog-card dialog-wide">
+        <button class="dialog-close" value="cancel" aria-label="Cerrar">×</button>
+        <p class="eyebrow">Entrada manual</p>
+        <h2>Pegar un pasaje</h2>
+        <p>Escribe cada versículo en una línea y empieza con su número. Por ejemplo: <strong>1 Había un hombre…</strong></p>
+        <label for="manual-reference">Referencia</label>
+        <input id="manual-reference" value="Juan 3:1-12" />
+        <label for="manual-text">Texto del pasaje</label>
+        <textarea id="manual-text" rows="11" placeholder="1 Había un hombre llamado Nicodemo…&#10;2 Una noche fue a hablar con Jesús…"></textarea>
+        <div class="dialog-actions end">
+          <button value="cancel" class="button button-ghost">Cancelar</button>
+          <button id="use-manual-text" value="default" class="button button-accent">Usar este texto</button>
+        </div>
+      </form>
+    </dialog>
+
+    <section id="print-root" aria-hidden="true"></section>
+    <div id="selection-box" class="selection-box" aria-hidden="true"></div>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <script src="app.js"></script>
+  </body>
+</html>
