@@ -22,11 +22,13 @@ function normalize(value) { return value.normalize("NFD").replace(/[\u0300-\u036
 function escapeHtml(value) { const node=document.createElement("div"); node.textContent=value; return node.innerHTML; }
 function uid() { return Math.random().toString(36).slice(2,9); }
 function parseReference(value) {
-  const match=normalize(value).match(/^(.+?)\s+(\d+)\s*:\s*(\d+)$/);
-  if(!match) throw new Error("Usa un formato como Juan 3:16.");
-  const [,book,chapter,verse]=match;
+  const match=normalize(value).replace(/[–—]/g,"-").match(/^(.+?)\s+(\d+)\s*:\s*(\d+)(?:\s*-\s*(\d+))?$/);
+  if(!match) throw new Error("Usa un formato como Juan 3:16 o Efesios 2:8-9.");
+  const [,book,chapter,start,end]=match;
   if(!BOOKS.has(book)) throw new Error(`No reconozco el libro “${book}”.`);
-  return { book,chapter:Number(chapter),verse:Number(verse) };
+  const firstVerse=Number(start),lastVerse=Number(end||start);
+  if(lastVerse<firstVerse) throw new Error("El último versículo del rango debe ser igual o posterior al primero.");
+  return { book,chapter:Number(chapter),start:firstVerse,end:lastVerse };
 }
 function splitWord(text) {
   const match=text.match(/^([^\p{L}\p{N}]*)((?:[\p{L}\p{N}ÁÉÍÓÚÜÑáéíóúüñ'-])+)([^\p{L}\p{N}]*)$/u);
@@ -73,9 +75,12 @@ function ensureReplacementOrders(){
 function ensureTokenReplacementOrder(token){if(!Number.isFinite(token.replacementOrder)){ensureReplacementOrders();token.replacementOrder=Math.max(0,...state.tokens.map((item)=>Number.isFinite(item.replacementOrder)?item.replacementOrder:0))+1;}}
 async function loadVerse(reference,version) {
   const parsed=parseReference(reference); const slug=encodeURIComponent(parsed.book.replace(/\s+/g,"-"));
-  const response=await fetch(`https://api.midvash.com/v1/${version.toLowerCase()}/${slug}/${parsed.chapter}/${parsed.verse}`);
-  if(!response.ok) throw new Error(response.status===404?"No encontré ese versículo.":"La fuente bíblica no respondió. Puedes escribirlo manualmente.");
-  const payload=await response.json(); const text=payload.data?.text;
+  const verseRange=parsed.start===parsed.end?String(parsed.start):`${parsed.start}-${parsed.end}`;
+  const response=await fetch(`https://api.midvash.com/v1/${version.toLowerCase()}/${slug}/${parsed.chapter}/${verseRange}`);
+  if(!response.ok) throw new Error(response.status===404?"No encontré ese versículo o rango.":"La fuente bíblica no respondió. Puedes escribirlo manualmente.");
+  const payload=await response.json();
+  const verses=payload.data?.verses;
+  const text=Array.isArray(verses)?verses.join(" "):payload.data?.text;
   if(!text) throw new Error("La fuente no devolvió texto.");
   state.reference=reference; state.version=version; state.tokens=tokenize(text); state.selected.clear(); state.copyright=COPYRIGHTS[version]; render(); save();
 }
@@ -85,7 +90,7 @@ function rectTo(x,y) { return {left:Math.min(state.origin.x,x),top:Math.min(stat
 function wordsIn(rect) { return [...els.canvas.querySelectorAll(".word")].filter((word)=>{const box=word.getBoundingClientRect(); const x=box.left+box.width/2,y=box.top+box.height/2; return x>=rect.left&&x<=rect.right&&y>=rect.top&&y<=rect.bottom;}); }
 function clearMarquee() { els.selectionBox.classList.remove("visible"); els.canvas.querySelectorAll(".selection-preview").forEach((word)=>word.classList.remove("selection-preview")); }
 
-els.form.addEventListener("submit",async(event)=>{event.preventDefault(); const button=els.form.querySelector("button[type=submit]"); button.disabled=true; button.textContent="Cargando…"; try{await loadVerse(els.reference.value.trim(),els.version.value); showToast("¡Versículo listo para jugar!");}catch(error){showToast(error.message);}finally{button.disabled=false; button.innerHTML="Cargar verso <span>→</span>";}});
+els.form.addEventListener("submit",async(event)=>{event.preventDefault(); const button=els.form.querySelector("button[type=submit]"); button.disabled=true; button.textContent="Cargando…"; try{await loadVerse(els.reference.value.trim(),els.version.value); showToast("¡Texto listo para jugar!");}catch(error){showToast(error.message);}finally{button.disabled=false; button.innerHTML="Cargar texto <span>→</span>";}});
 els.canvas.addEventListener("pointerdown",(event)=>{if(event.button!==0||!state.tokens.length)return; event.preventDefault(); state.dragging=true; state.origin={x:event.clientX,y:event.clientY,target:event.target.closest(".word")};});
 window.addEventListener("pointermove",(event)=>{if(!state.dragging)return; event.preventDefault(); const rect=rectTo(event.clientX,event.clientY); if(rect.right-rect.left<5&&rect.bottom-rect.top<5)return; Object.assign(els.selectionBox.style,{left:`${rect.left}px`,top:`${rect.top}px`,width:`${rect.right-rect.left}px`,height:`${rect.bottom-rect.top}px`}); els.selectionBox.classList.add("visible"); els.canvas.querySelectorAll(".word").forEach((word)=>word.classList.remove("selection-preview")); wordsIn(rect).forEach((word)=>word.classList.add("selection-preview"));},{passive:false});
 window.addEventListener("pointerup",(event)=>{if(!state.dragging)return; const origin=state.origin,rect=rectTo(event.clientX,event.clientY); const click=rect.right-rect.left<5&&rect.bottom-rect.top<5; if(click&&origin.target){const id=origin.target.dataset.id; state.selected.has(id)?state.selected.delete(id):state.selected.add(id);}else{wordsIn(rect).forEach((word)=>state.selected.add(word.dataset.id));} state.dragging=false; state.origin=null; clearMarquee(); render();});

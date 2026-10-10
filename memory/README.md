@@ -14,7 +14,7 @@ Abre `http://localhost:8080/memory/`.
 
 ## Funciones
 
-- Carga directa de un versículo en RVR1960 o NTV, sin registro.
+- Carga directa de un versículo o de un rango del mismo capítulo en RVR1960 o NTV, sin registro (por ejemplo, `Efesios 2:8-9`).
 - Selección individual o rectangular de palabras.
 - Color base configurable y coloración de palabras mediante una paleta o un color personalizado.
 - Selector de emojis organizado por categorías, además de emojis escritos por el usuario.
