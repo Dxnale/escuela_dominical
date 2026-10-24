@@ -22,6 +22,7 @@ Los textos no se almacenan en este repositorio y se muestra el aviso de copyrigh
 
 - Añade un personaje y elige su color en la columna izquierda.
 - Selecciónalo y haz clic o arrastra sobre sus palabras.
+- Usa **Ctrl+Z** para deshacer la última asignación o edición.
 - Usa **Borrar asignación** para corregir fragmentos.
 - Pulsa el círculo de color de un personaje para cambiarlo.
 - En **Imprimir hojas**, selecciona tipografía, variante regular/bold y tamaño.

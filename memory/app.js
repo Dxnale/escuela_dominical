@@ -15,6 +15,8 @@ const EMOJIS = {
   objetos:["💡","🔑","🚪","🏠","🛡️","⚔️","📜","✉️","🎁","💎","🪙","🍞","🏺","🕯️","⛵","⚓","🪜","⏳","🔔","🎺","🧺","🪨","🧭","🗺️"]
 };
 const state = { reference:"", version:"RVR1960", tokens:[], selected:new Set(), dragging:false, origin:null, copyright:"", baseColor:"#25251f" };
+const undoHistory = [];
+const UNDO_LIMIT = 30;
 const $ = (selector) => document.querySelector(selector);
 const els = { form:$("#verse-form"), reference:$("#reference-input"), version:$("#version-select"), canvas:$("#verse-canvas"), empty:$("#empty-state"), title:$("#verse-reference"), versionLabel:$("#verse-version"), copyright:$("#copyright"), selectionCount:$("#selection-count"), selectionBox:$("#selection-box"), toast:$("#toast"), printRoot:$("#print-root") };
 
@@ -38,6 +40,9 @@ function tokenize(text) {
   return text.trim().split(/(\s+)/).filter(Boolean).map((value) => /^\s+$/.test(value) ? { id:uid(),space:true,text:value } : { id:uid(),...splitWord(value),color:null,emoji:null });
 }
 function showToast(message) { els.toast.textContent=message; els.toast.classList.add("visible"); clearTimeout(showToast.timer); showToast.timer=setTimeout(()=>els.toast.classList.remove("visible"),2600); }
+function snapshotState() { return JSON.parse(JSON.stringify({reference:state.reference,version:state.version,tokens:state.tokens,selected:[...state.selected],copyright:state.copyright,baseColor:state.baseColor})); }
+function recordUndo() { undoHistory.push(snapshotState()); if(undoHistory.length>UNDO_LIMIT)undoHistory.shift(); }
+function undoLastAction() { const previous=undoHistory.pop(); if(!previous)return showToast("No hay acciones para deshacer."); Object.assign(state,previous,{selected:new Set(previous.selected),dragging:false,origin:null}); els.reference.value=state.reference||""; els.version.value=state.version||"RVR1960"; clearMarquee(); render(); save(); showToast("Última acción deshecha."); }
 function versionName() { return state.version==="NTV" ? "Nueva Traducción Viviente · NTV" : "Reina-Valera 1960 · RVR1960"; }
 function tokenById(id) { return state.tokens.find((token)=>token.id===id); }
 function wordHtml(token,{print=false,visibleReplacementIds=null}={}) {
@@ -82,10 +87,11 @@ async function loadVerse(reference,version) {
   const verses=payload.data?.verses;
   const text=Array.isArray(verses)?verses.join(" "):payload.data?.text;
   if(!text) throw new Error("La fuente no devolvió texto.");
+  recordUndo();
   state.reference=reference; state.version=version; state.tokens=tokenize(text); state.selected.clear(); state.copyright=COPYRIGHTS[version]; render(); save();
 }
 function requireSelection() { if(!state.selected.size){showToast("Selecciona una o varias palabras primero."); return false;} return true; }
-function modifySelected(change) { if(!requireSelection()) return; state.tokens.forEach((token)=>{if(state.selected.has(token.id)) change(token);}); render(); save(); }
+function modifySelected(change) { if(!requireSelection()) return; recordUndo(); state.tokens.forEach((token)=>{if(state.selected.has(token.id)) change(token);}); render(); save(); }
 function rectTo(x,y) { return {left:Math.min(state.origin.x,x),top:Math.min(state.origin.y,y),right:Math.max(state.origin.x,x),bottom:Math.max(state.origin.y,y)}; }
 function wordsIn(rect) { return [...els.canvas.querySelectorAll(".word")].filter((word)=>{const box=word.getBoundingClientRect(); const x=box.left+box.width/2,y=box.top+box.height/2; return x>=rect.left&&x<=rect.right&&y>=rect.top&&y<=rect.bottom;}); }
 function clearMarquee() { els.selectionBox.classList.remove("visible"); els.canvas.querySelectorAll(".selection-preview").forEach((word)=>word.classList.remove("selection-preview")); }
@@ -102,8 +108,8 @@ function renderEmojiCategory(category){$("#emoji-palette").innerHTML=EMOJIS[cate
 $("#emoji-tabs").addEventListener("click",(event)=>{const button=event.target.closest("[data-emoji-category]");if(!button)return;$("#emoji-tabs").querySelectorAll("button").forEach((item)=>item.classList.remove("active"));button.classList.add("active");renderEmojiCategory(button.dataset.emojiCategory);});
 $("#emoji-palette").addEventListener("click",(event)=>{const button=event.target.closest("[data-emoji]");if(button)modifySelected((token)=>{ensureTokenReplacementOrder(token);token.emoji=button.dataset.emoji;token.image=null;});});
 $("#apply-custom-emoji").addEventListener("click",()=>{const emoji=$("#custom-emoji").value.trim();if(!emoji)return showToast("Escribe o pega un emoji.");modifySelected((token)=>{ensureTokenReplacementOrder(token);token.emoji=emoji;token.image=null;});});
-$("#base-colors").addEventListener("click",(event)=>{const button=event.target.closest("[data-base-color]");if(!button)return;state.baseColor=button.dataset.baseColor;render();save();});
-$("#base-color").addEventListener("change",(event)=>{state.baseColor=event.target.value;render();save();});
+$("#base-colors").addEventListener("click",(event)=>{const button=event.target.closest("[data-base-color]");if(!button||state.baseColor===button.dataset.baseColor)return;recordUndo();state.baseColor=button.dataset.baseColor;render();save();});
+$("#base-color").addEventListener("change",(event)=>{if(state.baseColor===event.target.value)return;recordUndo();state.baseColor=event.target.value;render();save();});
 function resizePng(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onerror=reject;reader.onload=()=>{const image=new Image();image.onerror=reject;image.onload=()=>{const scale=Math.min(1,256/Math.max(image.width,image.height));const canvas=document.createElement("canvas");canvas.width=Math.max(1,Math.round(image.width*scale));canvas.height=Math.max(1,Math.round(image.height*scale));canvas.getContext("2d").drawImage(image,0,0,canvas.width,canvas.height);resolve(canvas.toDataURL("image/png"));};image.src=reader.result;};reader.readAsDataURL(file);});}
 async function applyPng(file,label="PNG pegado"){
   if(!requireSelection())return false;
@@ -115,17 +121,19 @@ async function applyPng(file,label="PNG pegado"){
 $("#png-input").addEventListener("change",async(event)=>{const file=event.target.files[0];if(file)await applyPng(file,file.name);event.target.value="";});
 window.addEventListener("paste",async(event)=>{const item=[...(event.clipboardData?.items||[])].find((entry)=>entry.kind==="file"&&entry.type==="image/png");if(!item)return;event.preventDefault();const file=item.getAsFile();if(file)await applyPng(file,"PNG pegado desde el portapapeles");});
 $("#restore-selected").addEventListener("click",()=>modifySelected((token)=>{token.color=null;token.emoji=null;token.image=null;token.replacementOrder=null;}));
-$("#restore-all").addEventListener("click",()=>{state.tokens.forEach((token)=>{token.color=null;token.emoji=null;token.image=null;token.replacementOrder=null;});state.selected.clear();render();save();});
+$("#restore-all").addEventListener("click",()=>{recordUndo();state.tokens.forEach((token)=>{token.color=null;token.emoji=null;token.image=null;token.replacementOrder=null;});state.selected.clear();render();save();});
 window.addEventListener("keydown",(event)=>{
   const target=event.target;
-  const isTyping=target.matches("input,textarea,select,button,a")||target.isContentEditable;
+  const isTextEditing=target.matches('textarea,input:not([type="color"]):not([type="file"])')||target.isContentEditable;
   const dialogOpen=document.querySelector("dialog[open]");
+  if(!isTextEditing&&!dialogOpen&&!event.shiftKey&&!event.altKey&&(event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==="z"){event.preventDefault();undoLastAction();return;}
+  const isTyping=target.matches("input,textarea,select,button,a")||target.isContentEditable;
   if(isTyping||dialogOpen)return;
   if(event.key==="Delete"&&state.selected.size){event.preventDefault();modifySelected((token)=>{token.color=null;token.emoji=null;token.image=null;token.replacementOrder=null;});showToast("Selección restaurada.");}
   if(event.key==="Enter"&&state.selected.size){event.preventDefault();state.selected.clear();render();showToast("Selección desmarcada.");}
 });
 $("#paste-button").addEventListener("click",()=>{$("#manual-reference").value=els.reference.value;$("#manual-dialog").showModal();});
-$("#use-manual").addEventListener("click",(event)=>{event.preventDefault();const text=$("#manual-text").value.trim();if(!text)return showToast("Escribe el texto del versículo.");state.reference=$("#manual-reference").value.trim()||"Versículo";state.version=els.version.value;state.tokens=tokenize(text.replace(/\s+/g," "));state.selected.clear();state.copyright="Texto introducido manualmente por el usuario.";els.reference.value=state.reference;$("#manual-dialog").close();render();save();});
+$("#use-manual").addEventListener("click",(event)=>{event.preventDefault();const text=$("#manual-text").value.trim();if(!text)return showToast("Escribe el texto del versículo.");recordUndo();state.reference=$("#manual-reference").value.trim()||"Versículo";state.version=els.version.value;state.tokens=tokenize(text.replace(/\s+/g," "));state.selected.clear();state.copyright="Texto introducido manualmente por el usuario.";els.reference.value=state.reference;$("#manual-dialog").close();render();save();});
 
 async function preparePrint() {
   const font=$("input[name=print-font]:checked").value,stack=FONT_STACKS[font]; const button=$("#confirm-print");

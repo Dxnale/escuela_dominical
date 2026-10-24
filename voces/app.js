@@ -37,6 +37,8 @@ const state = {
   selectionOrigin: null,
   copyright: ""
 };
+const undoHistory = [];
+const UNDO_LIMIT = 30;
 
 const $ = (selector) => document.querySelector(selector);
 const els = {
@@ -86,6 +88,35 @@ function showToast(message) {
   els.toast.classList.add("visible");
   clearTimeout(showToast.timer);
   showToast.timer = setTimeout(() => els.toast.classList.remove("visible"), 2800);
+}
+
+function snapshotState() {
+  return JSON.parse(JSON.stringify({
+    reference: state.reference,
+    version: state.version,
+    verses: state.verses,
+    characters: state.characters,
+    activeCharacter: state.activeCharacter,
+    erasing: state.erasing,
+    copyright: state.copyright
+  }));
+}
+
+function recordUndo() {
+  undoHistory.push(snapshotState());
+  if (undoHistory.length > UNDO_LIMIT) undoHistory.shift();
+}
+
+function undoLastAction() {
+  const previous = undoHistory.pop();
+  if (!previous) return showToast("No hay acciones para deshacer.");
+  Object.assign(state, previous, { dragging: false, selectionOrigin: null });
+  els.passageInput.value = state.reference || "";
+  els.versionSelect.value = state.version || "RVR1960";
+  clearSelectionPreview();
+  render();
+  scheduleSave();
+  showToast("Última acción deshecha.");
 }
 
 function setBusy(isBusy) {
@@ -159,6 +190,7 @@ function render() { renderCharacters(); renderPassage(); }
 function versionLabel(code) { return code === "NTV" ? "Nueva Traducción Viviente · NTV" : "Reina-Valera 1960 · RVR1960"; }
 
 function addCharacter(name, color) {
+  recordUndo();
   const character = { id: uid(), name: name.trim(), color };
   state.characters.push(character);
   state.activeCharacter = character.id;
@@ -192,6 +224,7 @@ async function loadPassage(reference, version) {
   const payload = await response.json();
   const verses = payload.data?.verses || (payload.data?.text ? [payload.data.text] : []);
   if (!verses.length) throw new Error("La fuente no devolvió texto para ese pasaje.");
+  recordUndo();
   state.reference = reference;
   state.version = version;
   state.verses = verses.map((text, index) => ({ number: parsed.start + index, tokens: tokenize(text) }));
@@ -322,6 +355,7 @@ els.characterList.addEventListener("click", (event) => {
   if (remove) {
     event.stopPropagation();
     const id = remove.dataset.remove;
+    recordUndo();
     state.characters = state.characters.filter((c) => c.id !== id);
     state.verses.forEach((v) => v.tokens.forEach((t) => { if (t.characterId === id) t.characterId = null; }));
     if (state.activeCharacter === id) state.activeCharacter = null;
@@ -334,7 +368,7 @@ els.characterList.addEventListener("change", (event) => {
   const input = event.target.closest("[data-color]");
   if (!input) return;
   const character = characterById(input.dataset.color);
-  if (character) { character.color = input.value; render(); scheduleSave(); }
+  if (character && character.color !== input.value) { recordUndo(); character.color = input.value; render(); scheduleSave(); }
 });
 
 els.eraser.addEventListener("click", () => { state.erasing = !state.erasing; renderCharacters(); });
@@ -388,9 +422,11 @@ window.addEventListener("pointerup", (event) => {
   const desired = state.erasing ? null : state.activeCharacter;
   if (isClick && origin.target) {
     const token = state.verses[+origin.target.dataset.verse].tokens[+origin.target.dataset.token];
+    recordUndo();
     assignWord(origin.target, token.characterId === desired ? null : desired);
   } else {
     const selected = wordsInside(rect);
+    if (selected.some((word) => state.verses[+word.dataset.verse].tokens[+word.dataset.token].characterId !== desired)) recordUndo();
     selected.forEach((word) => assignWord(word, desired));
     if (selected.length) showToast(`${selected.length} palabras seleccionadas.`);
   }
@@ -412,23 +448,36 @@ $("#paste-button").addEventListener("click", () => { $("#manual-reference").valu
 $("#use-manual-text").addEventListener("click", (event) => {
   event.preventDefault();
   try {
+    const verses = parseManualText($("#manual-text").value, $("#manual-reference").value.trim());
+    recordUndo();
     state.reference = $("#manual-reference").value.trim() || "Pasaje bíblico";
     state.version = els.versionSelect.value;
-    state.verses = parseManualText($("#manual-text").value, $("#manual-reference").value.trim());
+    state.verses = verses;
     state.copyright = "Texto introducido manualmente por el usuario.";
     els.passageInput.value = state.reference; els.pasteDialog.close(); render(); scheduleSave(); showToast("Texto preparado.");
   } catch (error) { showToast(error.message); }
 });
 $("#clear-button").addEventListener("click", () => {
   if (!state.verses.length || !confirm("¿Quitar todas las asignaciones de personajes?")) return;
+  recordUndo();
   state.verses.forEach((v) => v.tokens.forEach((t) => { t.characterId = null; })); renderPassage(); scheduleSave();
 });
 $("#print-button").addEventListener("click", openPrintOptions);
+
+window.addEventListener("keydown", (event) => {
+  const target = event.target;
+  const isTextEditing = target.matches('textarea,input:not([type="color"]):not([type="file"])') || target.isContentEditable;
+  const dialogOpen = document.querySelector("dialog[open]");
+  if (isTextEditing || dialogOpen || event.shiftKey || event.altKey || !(event.ctrlKey || event.metaKey) || event.key.toLowerCase() !== "z") return;
+  event.preventDefault();
+  undoLastAction();
+});
 
 const restoredProject = restore();
 if (!restoredProject) {
   addCharacter("Narrador", COLORS[0]);
   addCharacter("Jesús", COLORS[1]);
   addCharacter("Nicodemo", COLORS[2]);
+  undoHistory.length = 0;
 }
 render();
