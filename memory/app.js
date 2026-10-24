@@ -54,7 +54,7 @@ function render() {
   els.title.textContent=hasVerse?state.reference:"Carga un versículo";
   els.versionLabel.textContent=hasVerse?versionName():"Sin verso";
   els.copyright.textContent=state.copyright||"";
-  els.canvas.style.color=state.baseColor;
+  els.canvas.style.color=state.baseColor.toLowerCase()==="#25251f"?"var(--ink)":state.baseColor;
   els.canvas.innerHTML=state.tokens.map((token)=>wordHtml(token)).join("");
   $("#base-color").value=state.baseColor;
   $("#base-colors").querySelectorAll("[data-base-color]").forEach((button)=>button.classList.toggle("active",button.dataset.baseColor.toLowerCase()===state.baseColor.toLowerCase()));

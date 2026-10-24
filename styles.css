@@ -391,6 +391,25 @@ footer span:last-child {
   font-size: 22px;
 }
 
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --ink: #f1f0e9;
+    --muted: #aaa99f;
+    --paper: #151612;
+    --card: #20211c;
+    --line: #3b3c34;
+    --coral: #f07a62;
+  }
+
+  html[data-theme="dark"] .topbar { background: rgba(21, 22, 18, 0.9); }
+  html[data-theme="dark"] .eyebrow,
+  html[data-theme="dark"] .card-meta { color: #aaa99f; }
+  html[data-theme="dark"] .app-card { box-shadow: 0 13px 35px rgba(0, 0, 0, 0.24); }
+  html[data-theme="dark"] .app-card:hover,
+  html[data-theme="dark"] .app-card:focus-visible { box-shadow: 0 20px 44px rgba(0, 0, 0, 0.38); }
+  html[data-theme="dark"] .card-action span { color: #20211c; background: var(--ink); }
+  html[data-theme="dark"] .memory-visual { background: #302d20; }
+
 @media (max-width: 760px) {
   .topbar {
     padding: 0 4vw;

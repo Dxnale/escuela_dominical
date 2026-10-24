@@ -791,6 +791,46 @@ dialog::backdrop {
     overflow: hidden;
 }
 
+    :root[data-theme="dark"] {
+        color-scheme: dark;
+        --ink: #f1f0e9;
+        --muted: #aaa99f;
+        --cream: #141510;
+        --paper: #20211b;
+        --line: #3d3e35;
+    }
+    html[data-theme="dark"] .topbar { background: rgba(20, 21, 16, 0.9); }
+    html[data-theme="dark"] .button-ink,
+    html[data-theme="dark"] .custom-emoji-row button,
+    html[data-theme="dark"] .toast { color: #20230e; background: var(--sun); }
+    html[data-theme="dark"] .button-soft,
+    html[data-theme="dark"] .tool-label > span,
+    html[data-theme="dark"] .emoji-tabs button,
+    html[data-theme="dark"] .mouse-icon { background: #303129; }
+    html[data-theme="dark"] .loader-card { background: #20211b; border: 1px solid var(--line); box-shadow: 0 14px 35px rgba(0, 0, 0, 0.3); }
+    html[data-theme="dark"] .field input,
+    html[data-theme="dark"] .field select { color: var(--ink); background: #292a24; border-color: #55564d; }
+    html[data-theme="dark"] .tool-group { border-bottom-color: var(--line); }
+    html[data-theme="dark"] kbd,
+    html[data-theme="dark"] .custom-color,
+    html[data-theme="dark"] .base-color-row,
+    html[data-theme="dark"] .base-custom,
+    html[data-theme="dark"] .emoji-palette button,
+    html[data-theme="dark"] .dialog-card > input,
+    html[data-theme="dark"] .dialog-card textarea { color: var(--ink); background: #292a24; border-color: var(--line); }
+    html[data-theme="dark"] .color-palette > button,
+    html[data-theme="dark"] .custom-color,
+    html[data-theme="dark"] .base-colors button,
+    html[data-theme="dark"] .base-custom { border-color: #20211b; outline-color: #55564d; }
+    html[data-theme="dark"] .emoji-tabs button.active { color: #20230e; background: var(--sun); }
+    html[data-theme="dark"] .emoji-palette button:hover { background: #403a23; }
+    html[data-theme="dark"] .png-upload { border-color: #55564d; }
+    html[data-theme="dark"] .empty-state > span { color: #55564d; }
+    html[data-theme="dark"] .word:hover { background: #303129; }
+    html[data-theme="dark"] .word.selected { color: #25251f; background: #e9d36c; outline-color: #f1f0e9; }
+    html[data-theme="dark"] .word.selection-preview { color: #25251f; background: #e9c68b; }
+    html[data-theme="dark"] .font-options label:has(input:checked) { color: #25251f; background: #e8d777; box-shadow: 0 0 0 2px #20211b inset; }
+
 @media (max-width: 800px) {
     .topbar {
         padding: 0 4vw;
@@ -836,6 +876,7 @@ dialog::backdrop {
     body {
         margin: 0 !important;
         padding: 0 !important;
+        color: #25251f !important;
         background: white !important;
         print-color-adjust: exact;
         -webkit-print-color-adjust: exact;

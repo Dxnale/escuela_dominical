@@ -1,0 +1,58 @@
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+.theme-toggle {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 1000;
+  min-height: 44px;
+  padding: 0 15px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--ink);
+  background: var(--card, var(--paper));
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.2);
+  font: 700 12px var(--sans, system-ui, sans-serif);
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.theme-toggle:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 11px 32px rgba(0, 0, 0, 0.28);
+}
+
+.theme-toggle:focus-visible {
+  outline: 3px solid var(--lime, var(--accent, var(--sun, #ffd84d)));
+  outline-offset: 3px;
+}
+
+.theme-toggle > span:first-child {
+  font-size: 17px;
+  line-height: 1;
+}
+
+@media (max-width: 520px) {
+  .theme-toggle {
+    right: 14px;
+    bottom: 14px;
+  }
+}
+
+@media print {
+  .theme-toggle {
+    display: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-toggle {
+    transition: none;
+  }
+}

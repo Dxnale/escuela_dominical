@@ -132,6 +132,40 @@ dialog::backdrop { background: rgba(24,25,21,.58); backdrop-filter: blur(3px); }
   #manual-text { max-height: 42vh; }
 }
 
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --ink: #eeefe8;
+    --muted: #aaaba2;
+    --paper: #141510;
+    --card: #20211b;
+    --line: #3b3c34;
+  }
+
+  html[data-theme="dark"] .topbar { background: rgba(20, 21, 16, .9); }
+  html[data-theme="dark"] .button-dark,
+  html[data-theme="dark"] .add-character-form button,
+  html[data-theme="dark"] .toast { color: #20230e; background: var(--accent); }
+  html[data-theme="dark"] .search-card { background: #20211b; border: 1px solid var(--line); box-shadow: 0 15px 45px rgba(0,0,0,.3); }
+  html[data-theme="dark"] .field input,
+  html[data-theme="dark"] .field select { color: var(--ink); background: #292a24; border-color: #505149; }
+  html[data-theme="dark"] .character-row:hover { background: #292a24; }
+  html[data-theme="dark"] .character-row.active { background: color-mix(in srgb, var(--character-color) 20%, var(--card)); border-color: color-mix(in srgb, var(--character-color) 50%, var(--card)); }
+  html[data-theme="dark"] .color-dot,
+  html[data-theme="dark"] .add-character-form input[type=color] { background: #292a24; }
+  html[data-theme="dark"] .add-character-form input[type=text],
+  html[data-theme="dark"] .add-character-form input:not([type]),
+  html[data-theme="dark"] .dialog-card > input,
+  html[data-theme="dark"] .dialog-card textarea,
+  html[data-theme="dark"] .secret-field { color: var(--ink); background: #292a24; }
+  html[data-theme="dark"] .eraser-button.active,
+  html[data-theme="dark"] .selection-tip,
+  html[data-theme="dark"] .word:hover { background: #2b2c25; }
+  html[data-theme="dark"] .count { background: #303129; }
+  html[data-theme="dark"] .empty-icon { color: #55564c; }
+  html[data-theme="dark"] .secret-field button { color: var(--ink); background: #303129; }
+  html[data-theme="dark"] .print-preview { background: #292a24; border-color: #55564c; }
+  html[data-theme="dark"] .selection-box { box-shadow: 0 0 0 1px rgba(0,0,0,.55) inset; }
+
 @media print {
   @page { size: A4; margin: 18mm 17mm; }
   body { background: white !important; }
