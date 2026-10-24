@@ -301,7 +301,6 @@ function openPrintOptions() {
       <div class="dialog-actions end"><button value="cancel" class="button button-ghost">Cancelar</button><button id="confirm-print" value="default" class="button button-accent">Imprimir ${state.characters.length + 1} hojas</button></div>
     </form>`;
     document.body.appendChild(dialog);
-    dialog.querySelectorAll("select").forEach((select) => { select.style.cssText = "width:100%;height:44px;border:1px solid var(--line);border-radius:7px;padding:0 10px;background:white"; });
     const updatePrintPreview = () => {
       const font = $("#print-font").value;
       const preview = $("#print-preview");

@@ -99,6 +99,7 @@ dialog::backdrop { background: rgba(24,25,21,.58); backdrop-filter: blur(3px); }
 .dialog-card { width: 100%; min-width: 0; padding: 30px; position: relative; }
 .dialog-wide { width: 100%; }
 #paste-dialog { width: min(720px, calc(100vw - 32px)); max-width: 720px; max-height: calc(100vh - 32px); overflow-x: hidden; overflow-y: auto; }
+#print-dialog select { width: 100%; height: 44px; padding: 0 10px; border: 1px solid var(--line); border-radius: 7px; color: var(--ink); background: #f2f0e9; }
 .dialog-card > p:not(.eyebrow):not(.dialog-note) { color: var(--muted); font-size: 13px; line-height: 1.6; }
 .dialog-card label { color: var(--muted); margin-top: 20px; }
 .dialog-card > input, .dialog-card textarea, .secret-field { width: 100%; border: 1px solid var(--line); border-radius: 7px; background: white; }
@@ -166,6 +167,8 @@ dialog::backdrop { background: rgba(24,25,21,.58); backdrop-filter: blur(3px); }
   html[data-theme="dark"] .empty-icon { color: #55564c; }
   html[data-theme="dark"] .secret-field button { color: var(--ink); background: #303129; }
   html[data-theme="dark"] .print-preview { background: #292a24; border-color: #55564c; }
+  html[data-theme="dark"] #print-dialog select { color: #eeefe8; background: #292a24; border-color: #55564c; color-scheme: dark; }
+  html[data-theme="dark"] #print-dialog select option { color: #eeefe8; background: #292a24; }
   html[data-theme="dark"] .selection-box { box-shadow: 0 0 0 1px rgba(0,0,0,.55) inset; }
 
 @media print {
