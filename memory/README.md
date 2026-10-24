@@ -20,7 +20,7 @@ Abre `http://localhost:8080/memory/`.
 - Selector de emojis organizado por categorías, además de emojis escritos por el usuario.
 - Sustitución mediante archivos PNG, reducidos automáticamente para el guardado local.
 - Los PNG pueden adjuntarse o pegarse directamente desde el portapapeles.
-- Atajos: `Ctrl+Z` deshace la última acción, `Supr` restaura las palabras seleccionadas y `Enter` las deselecciona.
+- Atajos: `Ctrl+Z` deshace la última acción, incluidos los cambios de selección; `Supr` restaura las palabras seleccionadas y `Enter` las deselecciona.
 - El emoji conserva el ancho tipográfico de la palabra escondida.
 - Cinco tipografías de impresión joviales y legibles.
 - Cálculo automático del mayor tamaño que cabe en un A4 horizontal.
