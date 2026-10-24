@@ -8,6 +8,9 @@
   --accent-deep: #b8d01d;
   --serif: "Lora", Georgia, serif;
   --sans: "Inter", system-ui, sans-serif;
+  --content-max-width: 1380px;
+  --content-half-width: 690px;
+  --page-gutter: 4vw;
 }
 
 * { box-sizing: border-box; }
@@ -16,7 +19,7 @@ body { margin: 0; color: var(--ink); background: var(--paper); font-family: var(
 button, input, select, textarea { font: inherit; }
 button, select { cursor: pointer; }
 
-.topbar { height: 76px; padding: 0 5vw; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); background: rgba(246,243,235,.92); backdrop-filter: blur(12px); position: sticky; top: 0; z-index: 20; }
+.topbar { height: 76px; padding-inline: max(var(--page-gutter), calc(50% - var(--content-half-width))); display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); background: rgba(246,243,235,.92); backdrop-filter: blur(12px); position: sticky; top: 0; z-index: 20; }
 .brand { display: flex; align-items: center; gap: 11px; color: var(--ink); font-weight: 800; font-size: 19px; text-decoration: none; letter-spacing: -.04em; }
 .brand-mark { display: grid; place-items: center; width: 31px; height: 31px; background: var(--ink); color: var(--accent); border-radius: 50% 50% 48% 45%; font-family: var(--serif); font-style: italic; }
 .top-actions { display: flex; align-items: center; gap: 10px; }
@@ -28,7 +31,7 @@ button, select { cursor: pointer; }
 .button:hover { transform: translateY(-1px); }
 .source-link { text-decoration: none; }
 
-main { width: min(1380px, 92vw); margin: 0 auto; padding-bottom: 90px; }
+main { width: min(var(--content-max-width), calc(100% - var(--page-gutter) - var(--page-gutter))); margin: 0 auto; padding-bottom: 90px; }
 .hero { padding: 82px 0 48px; position: relative; }
 .hero::after { content: "✦"; position: absolute; right: 3%; top: 90px; color: #ce5f45; font-size: clamp(50px, 8vw, 105px); font-weight: 300; transform: rotate(10deg); }
 .eyebrow { margin: 0 0 12px; color: #818177; text-transform: uppercase; font-size: 10px; font-weight: 800; letter-spacing: .18em; }
@@ -117,9 +120,8 @@ dialog::backdrop { background: rgba(24,25,21,.58); backdrop-filter: blur(3px); }
 #print-root { display: none; }
 
 @media (max-width: 780px) {
-  .topbar { padding: 0 4vw; }
+  :root { --page-gutter: 3vw; }
   .save-status, .source-link { display: none; }
-  main { width: 94vw; }
   .hero { padding: 55px 8px 36px; }
   .hero::after { display: none; }
   .search-card form { grid-template-columns: 1fr; }

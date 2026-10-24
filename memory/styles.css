@@ -9,6 +9,9 @@
     --blue: #a9d9ee;
     --green: #b9dfbc;
     --sans: "Nunito", system-ui, sans-serif;
+    --content-max-width: 1360px;
+    --content-half-width: 680px;
+    --page-gutter: 4vw;
 }
 * {
     box-sizing: border-box;
@@ -36,7 +39,7 @@ button {
 }
 .topbar {
     height: 72px;
-    padding: 0 5vw;
+    padding-inline: max(var(--page-gutter), calc(50% - var(--content-half-width)));
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -108,7 +111,7 @@ button {
     border: 1px solid var(--line);
 }
 main {
-    width: min(1360px, 92vw);
+    width: min(var(--content-max-width), calc(100% - var(--page-gutter) - var(--page-gutter)));
     margin: 0 auto;
     padding-bottom: 70px;
 }
@@ -832,14 +835,11 @@ dialog::backdrop {
     html[data-theme="dark"] .font-options label:has(input:checked) { color: #25251f; background: #e8d777; box-shadow: 0 0 0 2px #20211b inset; }
 
 @media (max-width: 800px) {
-    .topbar {
-        padding: 0 4vw;
+    :root {
+        --page-gutter: 3vw;
     }
     #save-status {
         display: none;
-    }
-    main {
-        width: 94vw;
     }
     .intro {
         padding-top: 45px;
